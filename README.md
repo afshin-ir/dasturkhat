@@ -1,6 +1,6 @@
 # Dastoorkhat — Persian Spell Checking and Preferred Orthography
 
-[صفحهٔ فارسی افزونهٔ دستورخط](README.fa.md)
+[![صفحهٔ فارسی افزونهٔ دستورخط](assets/readme-fa-button.png)](README.fa.md)
 
 Dastoorkhat provides an optional LibreOffice Writer extension for checking Academy-preferred Persian spellings, alongside its Persian Hunspell dictionary. This project continues Afshin Falatouni’s fork of the upstream Lilak dictionary, which supplies the morphological data and Hunspell spell-checking foundation.
 
