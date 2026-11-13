@@ -7,7 +7,7 @@
     <version value="%VER%" />
     <identifier value="Lilak.Persian.Hunspell.Dictionary.by.Mostafa.Sedaghat.Joo" />
     <display-name>
-        <name lang="en">Dastoorkhat, Persian Preferred Orthography and Spell Checking</name>
+        <name lang="en">Dasturkhat, Persian Preferred Orthography and Spell Checking</name>
         <name lang="fa">دستورخط، بررسی رسم‌الخط و املای فارسی</name>
     </display-name>
     <dependencies>
