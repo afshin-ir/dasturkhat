@@ -237,6 +237,7 @@ class Lilak:
         verbs = set()
         nominals = set()
         adjectives = set()
+        numerals = set()
         degree_forms = set()
         nominal_tags = {
             'noun_singular', 'noun_plural', 'adjective',
@@ -254,6 +255,8 @@ class Lilak:
                     nominals.add(word)
                 if pos == 'adjective':
                     adjectives.add(word)
+                if pos == 'numeral':
+                    numerals.add(word)
                 if pos in {'adjective_comparative', 'adjective_superlative'}:
                     degree_forms.add(word)
 
@@ -263,6 +266,7 @@ class Lilak:
                 'verbs': sorted(verbs),
                 'nominals': sorted(nominals),
                 'adjectives': sorted(adjectives),
+                'numerals': sorted(numerals),
                 'degree_forms': sorted(degree_forms)
             }, f, ensure_ascii=False, separators=(',', ':'))
 
