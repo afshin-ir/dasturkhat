@@ -12,7 +12,7 @@ from com.sun.star.linguistic2 import XProofreader, XSupportedLocales
 
 
 ZWNJ = "\u200c"
-TOKEN_RE = re.compile(r"[\u0600-\u06ff\u200c]+")
+TOKEN_RE = re.compile(r"[\\w\\u200c]+", re.UNICODE)
 HA_SUFFIXES = (
     "هایشان", "هایمان", "هایتان", "هایم", "هایت", "هایش",
     "هایی", "هاست", "های", "ها",
