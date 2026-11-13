@@ -37,7 +37,7 @@ import argparse
 
 from pathlib import Path
 
-VERSIAN = '3.11'
+VERSIAN = '3.12'
 DEBUG = 1  # set to 1 to generate a debug output file
 
 ZWNJ          = '\u200C'
