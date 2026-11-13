@@ -1,6 +1,6 @@
 # Lilak — Persian Spell-Checking Dictionary
 
-[فارسی](README.fa.md)
+[![مطالعه به فارسی](https://img.shields.io/badge/%F0%9F%93%96-Read_in_Persian-167D9A?style=for-the-badge)](README.fa.md)
 
 Lilak builds a Persian Hunspell dictionary from a lexicon tagged with part of speech and Persian morphology. This repository also provides an optional LibreOffice Writer extension that checks selected Academy-preferred Persian spellings.
 
