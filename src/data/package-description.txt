@@ -1,4 +1,4 @@
-Dastoorkhat, Persian Spell Checking and Preferred Orthography
+Dasturkhat, Persian Spell Checking and Preferred Orthography
 
-Dastoorkhat provides Persian spell checking and Academy-preferred orthography checks for LibreOffice Writer. Its Hunspell dictionary is based on the upstream Lilak project and Persian morphology. 
+Dasturkhat provides Persian spell checking and Academy-preferred orthography checks for LibreOffice Writer. Its Hunspell dictionary is based on the upstream Lilak project and Persian morphology. 
 This dictionary is free and the source is available under Apache License Version 2.0.
