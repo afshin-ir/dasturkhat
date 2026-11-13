@@ -37,7 +37,7 @@ import argparse
 
 from pathlib import Path
 
-VERSIAN = '3.15'
+VERSIAN = '3.16'
 DEBUG = 1  # set to 1 to generate a debug output file
 
 ZWNJ          = '\u200C'
@@ -794,3 +794,4 @@ if __name__ == '__main__':
         lilak.dump_preferred_checker_data('../build/fa-IR-preferred.json')
 
     debug('done!')
+

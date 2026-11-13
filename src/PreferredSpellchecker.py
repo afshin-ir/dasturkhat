@@ -4,6 +4,7 @@
 import json
 import os
 import re
+import unicodedata
 
 import uno
 import unohelper
@@ -12,7 +13,8 @@ from com.sun.star.linguistic2 import XProofreader, XSupportedLocales
 
 
 ZWNJ = "\u200c"
-TOKEN_RE = re.compile(r"[\w\u200c]+", re.UNICODE)
+TOKEN_RE = re.compile(r"[\w\u200c\u200e\u200f\u0640\u064b-\u065f\u0670]+", re.UNICODE)
+NORMALIZE_MARKS_RE = re.compile(r"[\u064b-\u065f\u0670\u200e\u200f\u0640]")
 HA_SUFFIXES = (
     "هایشان", "هایمان", "هایتان", "هایم", "هایت", "هایش",
     "هایی", "هاست", "های", "ها",
@@ -95,6 +97,11 @@ BE_HALFSPACE_ATTACHED_FORMS = {
     "بموجب": "به" + ZWNJ + "موجب",
 }
 ZWNJ_COMPOUND_PREFIXES = ("برون", "بوم", "تک", "درون", "زیست", "میان", "نیم")
+JOINED_COMPOUND_PREFIXES = tuple(sorted((
+    "ابر", "ارتا", "با", "باز", "بر", "بینا", "پاد", "پرا", "پسا",
+    "پیرا", "پیشا", "ترا", "چند", "در", "دگر", "رایا", "زیر",
+    "فر", "فرا", "فرو", "نا", "وا", "ور",
+), key=len, reverse=True))
 ZWNJ_PREFIX_ATTACHED_EXAMPLES = {
     "برونمرزی": "برون" + ZWNJ + "مرزی",
     "بومشناسی": "بوم" + ZWNJ + "شناسی",
@@ -130,6 +137,8 @@ class LilakPreferredSpellchecker(
         self.adjectives = set()
         self.numerals = set()
         self.degree_forms = set()
+        self.preferred_forms = {}
+        self.preferred_phrases = ()
         data_path = os.path.join(os.path.dirname(__file__), "preferred-data.json")
         try:
             with open(data_path, "r", encoding="utf-8") as source:
@@ -141,6 +150,14 @@ class LilakPreferredSpellchecker(
             self.degree_forms = set(data.get("degree_forms", ()))
         except (OSError, ValueError):
             # Keep the extension loadable if the generated data file is absent.
+            pass
+        forms_path = os.path.join(os.path.dirname(__file__), "preferred-spellings.json")
+        try:
+            with open(forms_path, "r", encoding="utf-8") as source:
+                spelling_data = json.load(source)
+            self.preferred_forms = spelling_data.get("forms", {})
+            self.preferred_phrases = tuple(spelling_data.get("phrases", ()))
+        except (OSError, ValueError):
             pass
 
     def getServiceName(self):
@@ -196,6 +213,11 @@ class LilakPreferredSpellchecker(
         return stem + separator + suffix
 
     @staticmethod
+    def _normalize_spelling(word):
+        normalized = unicodedata.normalize("NFKC", word)
+        return NORMALIZE_MARKS_RE.sub("", normalized)
+
+    @staticmethod
     def _single_verb_prefix_form(prefix, verb):
         if verb.startswith("ایست"):
             return prefix + verb
@@ -224,6 +246,15 @@ class LilakPreferredSpellchecker(
         # words that merely share the same ending are left alone.
         for index, token in enumerate(tokens):
             word = token.group(0)
+
+            table_suggestion = self.preferred_forms.get(
+                self._normalize_spelling(word)
+            )
+            if table_suggestion:
+                add(token.start(), token.end(), "lilak-academy-preferred-form",
+                    table_suggestion,
+                    "صورتِ مرجّح در جدول واژه‌های چنداملاییِ فرهنگستان آمده است.")
+                continue
 
             lexical_roots = self.nominals | self.adjectives
 
@@ -354,6 +385,47 @@ class LilakPreferredSpellchecker(
                             "پسوند تفضیلی/عالی با جداکنندهٔ درست نوشته می‌شود.")
                         break
 
+            # "این/آن" are normally separate from the following lexical word.
+            # Split an attached form only when its second element is known and
+            # the whole token is not one of the Academy's lexicalized exceptions.
+            demonstrative_exceptions = {
+                "اینجا", "آنجا", "آنچه", "آنکه", "اینکه", "وانگهی",
+                "اینطور", "آنطور", "اینگونه", "آنگونه",
+            }
+            if word not in demonstrative_exceptions:
+                for demonstrative in ("این", "آن"):
+                    if word.startswith(demonstrative) and len(word) > len(demonstrative):
+                        rest = word[len(demonstrative):]
+                        if rest.startswith(ZWNJ):
+                            rest = rest[len(ZWNJ):]
+                        if rest in self.nominals | self.adjectives:
+                            add(token.start(), token.end(),
+                                "lilak-demonstrative-space",
+                                demonstrative + " " + rest,
+                                "«این/آن» پیش از این واژه با فاصلهٔ کامل نوشته می‌شود.")
+                        break
+
+            # "چه" is separate from its following word except in the fixed
+            # lexicalized forms enumerated by the Academy.
+            if word.startswith("چه") and len(word) > 2:
+                rest = word[2:]
+                if rest.startswith(ZWNJ):
+                    rest = rest[len(ZWNJ):]
+                if (rest in self.nominals | self.adjectives | self.numerals
+                        and word not in {"چرا", "چطور", "چقدر", "چگونه"}):
+                    add(token.start(), token.end(), "lilak-che-space",
+                        "چه " + rest,
+                        "«چه» در این ساخت با فاصلهٔ کامل نوشته می‌شود.")
+
+            # The postposition "را" is separate from a known nominal. Do not
+            # split lexicalized exceptions such as "مرا" or the adverb "چرا".
+            if word.endswith("را") and word not in {"چرا", "مرا"}:
+                stem = word[:-2]
+                if stem in self.nominals and word not in self.nominals:
+                    add(token.start(), token.end(), "lilak-ra-space",
+                        stem + " را",
+                        "نشانهٔ مفعولی «را» با فاصلهٔ کامل نوشته می‌شود.")
+
             attached_suggestion = DEMONSTRATIVE_ATTACHED_FORMS.get(word)
             if attached_suggestion:
                 add(token.start(), token.end(), "lilak-demonstrative-compound",
@@ -387,6 +459,19 @@ class LilakPreferredSpellchecker(
                         add(token.start(), token.end(), "lilak-compound-prefix",
                             compound_prefix + ZWNJ + rest,
                             "این پیشوندواره با نیم‌فاصله نوشته می‌شود.")
+                    break
+
+            # These prefixes cannot connect to the next word in the standard
+            # spelling, so a ZWNJ after them is removed when the base is known.
+            for compound_prefix in JOINED_COMPOUND_PREFIXES:
+                marker = compound_prefix + ZWNJ
+                if word.startswith(marker):
+                    rest = word[len(marker):]
+                    base = rest.split(ZWNJ, 1)[0]
+                    if base and base in (lexical_roots | self.verbs):
+                        add(token.start(), token.end(), "lilak-joined-prefix",
+                            compound_prefix + rest,
+                            "این پیشوند در این ترکیب پیوسته نوشته می‌شود.")
                     break
 
             # Negative prefix "بیـ" uses ZWNJ. Skip lexicalized exceptions,
@@ -537,6 +622,51 @@ class LilakPreferredSpellchecker(
                                 "صورتِ دارای نیم‌فاصله برای پسوند «ها» مرجّح است.")
                             break
 
+        # Some fixed expressions are written as one word or with half-spaces.
+        # Match only the exact listed sequence of whitespace-separated tokens;
+        # punctuation and unrelated words prevent a match.
+        phrase_ranges = []
+        for phrase in self.preferred_phrases:
+            parts = phrase.get("parts", ())
+            preferred = phrase.get("preferred", "")
+            if not parts or not preferred or len(tokens) < len(parts):
+                continue
+            normalized_parts = tuple(self._normalize_spelling(part) for part in parts)
+            for first in range(len(tokens) - len(parts) + 1):
+                matched = True
+                for offset, part in enumerate(normalized_parts):
+                    current = tokens[first + offset]
+                    if self._normalize_spelling(current.group(0)) != part:
+                        matched = False
+                        break
+                    if offset:
+                        previous = tokens[first + offset - 1]
+                        gap = text[previous.end():current.start()]
+                        if not gap or not gap.isspace():
+                            matched = False
+                            break
+                if not matched:
+                    continue
+                start = tokens[first].start()
+                end = tokens[first + len(parts) - 1].end()
+                if start < sentence_start or end > sentence_end:
+                    continue
+                if text[start:end] == preferred:
+                    continue
+                phrase_ranges.append((start, end))
+                errors.append(self._make_error(
+                    start, end - start, "lilak-academy-preferred-phrase",
+                    preferred,
+                    "صورتِ مرجّحِ این ترکیب در دستور خط فرهنگستان آمده است."
+                ))
+
+        if phrase_ranges:
+            errors = [error for error in errors if not any(
+                error.nErrorStart < end
+                and error.nErrorStart + error.nErrorLength > start
+                and error.aRuleIdentifier != "lilak-academy-preferred-phrase"
+                for start, end in phrase_ranges
+            )]
         errors.sort(key=lambda error: error.nErrorStart)
         return tuple(errors)
 
@@ -578,3 +708,4 @@ g_ImplementationHelper.addImplementation(
     LilakPreferredSpellchecker.IMPLEMENTATION_NAME,
     (LilakPreferredSpellchecker.SERVICE_NAME,),
 )
+

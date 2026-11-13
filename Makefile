@@ -25,6 +25,7 @@ libreoffice: build
 	cp ./src/PreferredSpellchecker.py ./build/libre/PreferredSpellchecker.py
 	cp ./src/data/Linguistic.xcu ./build/libre/Linguistic.xcu
 	cp ./build/fa-IR-preferred.json ./build/libre/preferred-data.json
+	cp ./src/data/preferred-spellings.json ./build/libre/preferred-spellings.json
 	cp ./src/data/README_fa_IR.txt ./build/libre/README_fa_IR.txt
 	cp ./src/data/dictionaries.xcu ./build/libre/dictionaries.xcu
 	cp ./src/data/description.xml ./build/libre/description.xml
@@ -59,3 +60,4 @@ extensions: build
 	cd build && ~/chromium/src/out/Debug/convert_dict fa-IR
 
 .PHONY: all build extensions libreoffice test
+
