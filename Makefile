@@ -14,7 +14,7 @@ test:
 
 libreoffice: build
 	# LibreOffice oxt
-	rm -rf ./build/libre ./build/fa-IR-dictionary.oxt
+	rm -rf ./build/libre ./build/dastoorkhat-fa-IR.oxt
 	mkdir -p ./build/libre ./build/libre/META-INF
 	cp ./build/fa-IR.dic  ./build/libre/fa-IR.dic
 	cp ./build/fa-IR.aff  ./build/libre/fa-IR.aff
@@ -30,7 +30,7 @@ libreoffice: build
 	cp ./src/data/dictionaries.xcu ./build/libre/dictionaries.xcu
 	cp ./src/data/description.xml ./build/libre/description.xml
 	sed -i 's/%VER%/$(VERSION)/g' ./build/libre/description.xml
-	cd ./build/libre && zip -r ../fa-IR-dictionary.oxt *
+	cd ./build/libre && zip -r ../dastoorkhat-fa-IR.oxt *
 
 extensions: build
 	# mozila xpi
