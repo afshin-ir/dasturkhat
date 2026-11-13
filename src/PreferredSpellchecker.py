@@ -43,6 +43,13 @@ HARE_COMPOUND_STEMS = {
 HARE_COMPOUND_FORMS = {"هر" + stem for stem in HARE_COMPOUND_STEMS}
 HIC_COMPOUND_STEMS = {"کدام", "کس", "گاه", "گونه", "یک"}
 HIC_COMPOUND_FORMS = {"هیچ" + ZWNJ + stem for stem in HIC_COMPOUND_STEMS}
+HAM_PREFIX_EXCEPTIONS = {
+    "هماره", "همان", "هماورد", "هماهنگ", "همایش", "همباز", "همتا",
+    "همچنان", "همچنین", "همچو", "همچون", "همدل", "همدم", "همدیگر",
+    "همراه", "همزن", "همسان", "همسایه", "همسر", "همشهری", "همشیره",
+    "همکار", "همکرد", "همکف", "همگن", "همگون", "همو", "هموار",
+    "همواره", "هموند", "همیدون", "همین",
+}
 
 
 class LilakPreferredSpellchecker(
@@ -174,6 +181,26 @@ class LilakPreferredSpellchecker(
                 add(token.start(), token.end(), "lilak-same-demonstrative",
                     same_suggestion,
                     "این ترکیب با نیم‌فاصله نوشته می‌شود.")
+
+            # Productive "همـ" compounds use ZWNJ; lexicalized exceptions
+            # listed by the Academy stay joined. Only attached inputs are checked,
+            # since a full space can mean the adverb "also" plus a noun.
+            if (word.startswith("هم") and not word.startswith("همی")
+                    and len(word) > 2 and word[2] != ZWNJ
+                    and not any(word.startswith(item) for item in HAM_PREFIX_EXCEPTIONS)):
+                rest = word[2:]
+                base = rest.split(ZWNJ, 1)[0]
+                lexical_roots = self.nominals | self.adjectives
+                root_known = base in lexical_roots
+                if not root_known:
+                    for suffix in HA_SUFFIXES:
+                        if base.endswith(suffix) and base[:-len(suffix)] in lexical_roots:
+                            root_known = True
+                            break
+                if root_known:
+                    add(token.start(), token.end(), "lilak-ham-prefix",
+                        "هم" + ZWNJ + rest,
+                        "پیشوند «هم» در این ترکیب با نیم‌فاصله نوشته می‌شود.")
 
             # The book treats these lexicalized forms of "هر" as one word.
             normalized_hare = word.replace(ZWNJ, "")
