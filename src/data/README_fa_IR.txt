@@ -1,6 +1,6 @@
-Dastoorkhat project
+Dasturkhat project
 ===================
-https://github.com/afshin-ir/dastoorkhat
+https://github.com/afshin-ir/dasturkhat
 
 Upstream source
 ===============
@@ -26,7 +26,7 @@ limitations under the License.
 
 README
 ======
-Dastoorkhat provides Academy-preferred Persian orthography checks in LibreOffice Writer. Its Hunspell dictionary is based on the upstream Lilak project and Persian morphology.
+Dasturkhat provides Academy-preferred Persian orthography checks in LibreOffice Writer. Its Hunspell dictionary is based on the upstream Lilak project and Persian morphology.
 This dictionary is free and the source is available under Apache License Version 2.0.
 
 دستورخط؛ بررسی رسم‌الخط مرجّح در LibreOffice Writer
