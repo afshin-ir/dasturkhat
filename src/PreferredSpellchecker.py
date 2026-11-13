@@ -58,6 +58,10 @@ BI_PREFIX_SPACE_BASES = {
     "باک", "تاب", "جان", "حال", "حد", "رحم", "رنگ", "روح", "شمار",
     "طرف", "سواد", "گمان", "رویه", "کران",
 }
+BI_PREFIX_ATTACHED_EXAMPLES = {
+    "بیچونوچرا": "بی" + ZWNJ + "چون" + ZWNJ + "و" + ZWNJ + "چرا",
+    "بیچون" + ZWNJ + "وچرا": "بی" + ZWNJ + "چون" + ZWNJ + "و" + ZWNJ + "چرا",
+}
 ZWNJ_COMPOUND_PREFIXES = ("برون", "بوم", "تک", "درون", "زیست", "میان", "نیم")
 ZWNJ_PREFIX_ATTACHED_EXAMPLES = {
     "برونمرزی": "برون" + ZWNJ + "مرزی",
@@ -232,8 +236,12 @@ class LilakPreferredSpellchecker(
 
             # Negative prefix "بیـ" uses ZWNJ. Skip lexicalized exceptions,
             # names, and verb forms that only resemble this prefix.
-            if word.startswith("بی") and len(word) > 2 and word[2] != ZWNJ:
-                if not word.startswith("بیی") and word not in self.verbs:
+            bi_example = BI_PREFIX_ATTACHED_EXAMPLES.get(word)
+            if bi_example:
+                add(token.start(), token.end(), "lilak-bi-prefix", bi_example,
+                    "پیشوند نفیِ «بی» با نیم‌فاصله نوشته می‌شود.")
+            elif word.startswith("بی") and len(word) > 2 and word[2] != ZWNJ:
+                if word not in self.verbs:
                     is_exception = any(word.startswith(item) for item in BI_PREFIX_EXCEPTIONS)
                     rest = word[2:]
                     lexical_roots = self.nominals | self.adjectives
