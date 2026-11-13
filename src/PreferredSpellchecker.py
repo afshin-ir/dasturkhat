@@ -43,6 +43,21 @@ HARE_COMPOUND_STEMS = {
 HARE_COMPOUND_FORMS = {"هر" + stem for stem in HARE_COMPOUND_STEMS}
 HIC_COMPOUND_STEMS = {"کدام", "کس", "گاه", "گونه", "یک"}
 HIC_COMPOUND_FORMS = {"هیچ" + ZWNJ + stem for stem in HIC_COMPOUND_STEMS}
+BI_PREFIX_EXCEPTIONS = {
+    "بیجا", "بیچاره", "بیخود", "بیداد", "بیدل", "بیراه", "بیزار",
+    "بیعار", "بیکار", "بینوا", "بیهوش", "بیهوده", "بیگانه", "بیشتر",
+    # Lexicalized words, names, or verb forms that only resemble "بی + stem".
+    "بیاد", "بیارجمند", "بیتا", "بیتایی", "بیتل", "بیجار", "بیجاری",
+    "بیدار", "بیستم", "بیستون", "بیشام", "بیشاپور", "بیشه", "بیرونی",
+    "بیله", "بیلک", "بیلیون", "بیمار", "بیماری", "بیمه", "بین", "بینا",
+    "بینال", "بینه", "بینی", "بیهاری", "بیژن", "بیکاره", "بیکاری",
+    "بیسینگر", "بیگاری", "بیگاه", "بیگل", "بیگلو", "بیگم", "بیگودی",
+}
+BI_PREFIX_SPACE_BASES = {
+    "تردید", "توجه", "حاصل", "حساب", "حوصله", "جهت", "قرار",
+    "باک", "تاب", "جان", "حال", "حد", "رحم", "رنگ", "روح", "شمار",
+    "طرف", "سواد", "گمان", "رویه", "کران",
+}
 ZWNJ_COMPOUND_PREFIXES = ("برون", "بوم", "تک", "درون", "زیست", "میان", "نیم")
 ZWNJ_PREFIX_ATTACHED_EXAMPLES = {
     "برونمرزی": "برون" + ZWNJ + "مرزی",
@@ -215,6 +230,18 @@ class LilakPreferredSpellchecker(
                             "این پیشوندواره با نیم‌فاصله نوشته می‌شود.")
                     break
 
+            # Negative prefix "بیـ" uses ZWNJ. Skip lexicalized exceptions,
+            # names, and verb forms that only resemble this prefix.
+            if word.startswith("بی") and len(word) > 2 and word[2] != ZWNJ:
+                if not word.startswith("بیی") and word not in self.verbs:
+                    is_exception = any(word.startswith(item) for item in BI_PREFIX_EXCEPTIONS)
+                    rest = word[2:]
+                    lexical_roots = self.nominals | self.adjectives
+                    if not is_exception and rest in lexical_roots:
+                        add(token.start(), token.end(), "lilak-bi-prefix",
+                            "بی" + ZWNJ + rest,
+                            "پیشوند نفیِ «بی» با نیم‌فاصله نوشته می‌شود.")
+
             # Productive "همـ" compounds use ZWNJ; lexicalized exceptions
             # listed by the Academy stay joined. Only attached inputs are checked,
             # since a full space can mean the adverb "also" plus a noun.
@@ -269,6 +296,12 @@ class LilakPreferredSpellchecker(
                             "lilak-demonstrative-compound",
                             word + ZWNJ + next_word,
                             "این ترکیب با نیم‌فاصله نوشته می‌شود.")
+
+                if gap and gap.isspace() and word == "بی":
+                    if next_word in BI_PREFIX_SPACE_BASES:
+                        add(token.start(), next_token.end(), "lilak-bi-prefix",
+                            "بی" + ZWNJ + next_word,
+                            "پیشوند نفیِ «بی» با نیم‌فاصله نوشته می‌شود.")
 
                 if gap and gap.isspace() and word == "هر":
                     if next_word in HARE_COMPOUND_STEMS:
