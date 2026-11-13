@@ -58,6 +58,13 @@ BI_PREFIX_SPACE_BASES = {
     "باک", "تاب", "جان", "حال", "حد", "رحم", "رنگ", "روح", "شمار",
     "طرف", "سواد", "گمان", "رویه", "کران",
 }
+ZWNJ_SUFFIXES = ("آگین", "آسا", "باره", "جات", "فام", "وش", "سان", "وار")
+ATTACHED_SUFFIXES = ("واره",)
+WAR_SUFFIX_EXCEPTIONS = {
+    "بزرگوار", "خانوار", "راهوار", "رهوار", "سوگوار", "شاهوار",
+    "شهوار", "عیالوار", "ماهوار",
+}
+SAN_SUFFIX_EXCEPTIONS = {"همسان", "یکسان"}
 BI_PREFIX_ATTACHED_EXAMPLES = {
     "بیچونوچرا": "بی" + ZWNJ + "چون" + ZWNJ + "و" + ZWNJ + "چرا",
     "بیچون" + ZWNJ + "وچرا": "بی" + ZWNJ + "چون" + ZWNJ + "و" + ZWNJ + "چرا",
@@ -208,6 +215,47 @@ class LilakPreferredSpellchecker(
         # words that merely share the same ending are left alone.
         for index, token in enumerate(tokens):
             word = token.group(0)
+
+            lexical_roots = self.nominals | self.adjectives
+
+            # Productive suffixes which the Academy writes with a ZWNJ,
+            # except after letters that cannot connect to the following letter.
+            for suffix in ZWNJ_SUFFIXES:
+                if word.endswith(ZWNJ + suffix):
+                    stem = word[:-len(ZWNJ + suffix)]
+                    joined = stem + suffix
+                    if suffix == "وار" and joined in WAR_SUFFIX_EXCEPTIONS:
+                        suggestion = joined
+                    elif suffix == "سان" and joined in SAN_SUFFIX_EXCEPTIONS:
+                        suggestion = joined
+                    else:
+                        suggestion = self._degree_form(stem, suffix)
+                    if stem in lexical_roots and suggestion != word:
+                        add(token.start(), token.end(), "lilak-productive-suffix",
+                            suggestion,
+                            "این پسوند با جداکنندهٔ مقرر نوشته می‌شود.")
+                    break
+                elif word.endswith(suffix):
+                    stem = word[:-len(suffix)]
+                    if (stem in lexical_roots
+                            and word not in WAR_SUFFIX_EXCEPTIONS
+                            and word not in SAN_SUFFIX_EXCEPTIONS):
+                        suggestion = self._degree_form(stem, suffix)
+                        if suggestion != word:
+                            add(token.start(), token.end(), "lilak-productive-suffix",
+                                suggestion,
+                                "این پسوند با جداکنندهٔ مقرر نوشته می‌شود.")
+                    break
+
+            # The suffix "-واره" is written attached.
+            for suffix in ATTACHED_SUFFIXES:
+                if word.endswith(ZWNJ + suffix):
+                    stem = word[:-len(ZWNJ + suffix)]
+                    if stem in lexical_roots:
+                        add(token.start(), token.end(), "lilak-attached-suffix",
+                            stem + suffix,
+                            "پسوند «واره» پیوسته نوشته می‌شود.")
+                    break
 
             for suffix in DEGREE_SUFFIXES:
                 if word.endswith(ZWNJ + suffix):
