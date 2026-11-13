@@ -12,7 +12,7 @@ build:
 test:
 	cd src && python3 test.py
 
-extensions:
+extensions: build
 	# mozila xpi
 	rm -rf ./build/mozila ./build/fa-IR-dictionary.xpi
 	mkdir -p ./build/mozila
@@ -33,6 +33,9 @@ extensions:
 	cp ./LICENSE ./build/libre/LICENSE
 	cp ./icon.png ./build/libre/icon.png
 	cp ./src/data/META-INF/manifest.xml ./build/libre/META-INF/manifest.xml
+	cp ./src/PreferredSpellchecker.py ./build/libre/PreferredSpellchecker.py
+	cp ./src/data/Linguistic.xcu ./build/libre/Linguistic.xcu
+	cp ./build/fa-IR-preferred.json ./build/libre/preferred-data.json
 	cp ./src/data/README_fa_IR.txt ./build/libre/README_fa_IR.txt
 	cp ./src/data/dictionaries.xcu ./build/libre/dictionaries.xcu
 	cp ./src/data/description.xml ./build/libre/description.xml
