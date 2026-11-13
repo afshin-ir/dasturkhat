@@ -1,4 +1,4 @@
-Lilak, Persian Spell Checking Dictionary
+Dastoorkhat, Persian Spell Checking and Preferred Orthography
 
-Lilak is an open source project for generating Persian dictionary for hunspell spell checker based on Persian Morphology. 
+Dastoorkhat provides Persian spell checking and Academy-preferred orthography checks for LibreOffice Writer. Its Hunspell dictionary is based on the upstream Lilak project and Persian morphology. 
 This dictionary is free and the source is available under Apache License Version 2.0.
