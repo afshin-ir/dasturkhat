@@ -27,6 +27,6 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: dastoorkhat-fa-IR-oxt
-          path: build/fa-IR-dictionary.oxt
+          path: build/dastoorkhat-fa-IR.oxt
           if-no-files-found: error
           retention-days: 14
