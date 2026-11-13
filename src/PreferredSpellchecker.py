@@ -33,6 +33,8 @@ HARE_COMPOUND_STEMS = {
     "آینه", "ازگاهی", "چند", "طور", "کدام", "کس", "که", "گاه", "گونه", "یک",
 }
 HARE_COMPOUND_FORMS = {"هر" + stem for stem in HARE_COMPOUND_STEMS}
+HIC_COMPOUND_STEMS = {"کدام", "کس", "گاه", "گونه", "یک"}
+HIC_COMPOUND_FORMS = {"هیچ" + ZWNJ + stem for stem in HIC_COMPOUND_STEMS}
 
 
 class LilakPreferredSpellchecker(
@@ -166,6 +168,13 @@ class LilakPreferredSpellchecker(
                     normalized_hare,
                     "این صورتِ واژگانی‌شده با «هر» پیوسته نوشته می‌شود.")
 
+            # These five lexicalized compounds take a ZWNJ after "هیچ".
+            normalized_hich = "هیچ" + ZWNJ + word.replace("هیچ", "", 1).replace(ZWNJ, "")
+            if word.startswith("هیچ") and normalized_hich in HIC_COMPOUND_FORMS:
+                add(token.start(), token.end(), "lilak-hich-compound",
+                    normalized_hich,
+                    "این ترکیبِ واژگانی‌شده با «هیچ» با نیم‌فاصله نوشته می‌شود.")
+
             for prefix in MI_PREFIXES:
                 if word.startswith(prefix) and ZWNJ not in word:
                     stem = word[len(prefix):]
@@ -193,6 +202,13 @@ class LilakPreferredSpellchecker(
                             "lilak-har-compound",
                             "هر" + next_word,
                             "این صورتِ واژگانی‌شده با «هر» پیوسته نوشته می‌شود.")
+
+                if gap and gap.isspace() and word == "هیچ":
+                    if next_word in HIC_COMPOUND_STEMS:
+                        add(token.start(), next_token.end(),
+                            "lilak-hich-compound",
+                            "هیچ" + ZWNJ + next_word,
+                            "این ترکیبِ واژگانی‌شده با «هیچ» با نیم‌فاصله نوشته می‌شود.")
 
                 if gap and gap.isspace() and next_word in {"تر", "ترین"}:
                     if (word in self.adjectives
