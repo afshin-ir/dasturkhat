@@ -7,8 +7,8 @@
     <version value="%VER%" />
     <identifier value="Lilak.Persian.Hunspell.Dictionary.by.Mostafa.Sedaghat.Joo" />
     <display-name>
-        <name lang="en">Lilak, Persian Spell Checking Dictionary</name>
-        <name lang="fa">لیلک، غلط‌ یاب فارسی</name>
+        <name lang="en">Dastoorkhat, Persian Preferred Orthography and Spell Checking</name>
+        <name lang="fa">دستورخط، بررسی رسم‌الخط و املای فارسی</name>
     </display-name>
     <dependencies>
         <OpenOffice.org-minimal-version value="3.4" d:name="OpenOffice.org 3.4" />
