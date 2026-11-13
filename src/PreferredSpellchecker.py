@@ -169,8 +169,13 @@ class LilakPreferredSpellchecker(
         result.aLocale = locale
         result.nStartOfSentencePosition = start_of_sentence
         end = min(max(suggested_sentence_end, start_of_sentence), len(text))
-        result.nStartOfNextSentencePosition = end
-        result.nBehindEndOfSentencePosition = end
+        next_sentence = end
+        while next_sentence < len(text) and text[next_sentence] == " ":
+            next_sentence += 1
+        if next_sentence == suggested_sentence_end and next_sentence < len(text):
+            next_sentence += 1
+        result.nStartOfNextSentencePosition = next_sentence
+        result.nBehindEndOfSentencePosition = next_sentence
         result.aProperties = ()
         result.xProofreader = self
         result.aErrors = ()
@@ -178,7 +183,9 @@ class LilakPreferredSpellchecker(
         if not self.hasLocale(locale) or not text:
             return result
 
-        result.aErrors = self._find_errors(text, start_of_sentence, end)
+        result.aErrors = self._find_errors(
+            text, start_of_sentence, next_sentence
+        )
         return result
 
 
