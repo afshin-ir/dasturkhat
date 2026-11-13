@@ -26,6 +26,9 @@ DEMONSTRATIVE_ATTACHED_FORMS = {
     "آنگونه": "آن" + ZWNJ + "گونه",
 }
 DEMONSTRATIVE_PARTS = {"طور", "گونه"}
+UNJOINABLE_ENDINGS = set("اآدذرزژو")
+DEGREE_SUFFIXES = ("ترین", "تر")
+DEGREE_EXCEPTIONS = {"بهتر", "کهتر", "مهتر", "بیشتر", "کمتر", "کلانتر"}
 HARE_COMPOUND_STEMS = {
     "آینه", "ازگاهی", "چند", "طور", "کدام", "کس", "که", "گاه", "گونه", "یک",
 }
@@ -46,12 +49,16 @@ class LilakPreferredSpellchecker(
         self.locales = (Locale("fa", "IR", ""),)
         self.verbs = set()
         self.nominals = set()
+        self.adjectives = set()
+        self.degree_forms = set()
         data_path = os.path.join(os.path.dirname(__file__), "preferred-data.json")
         try:
             with open(data_path, "r", encoding="utf-8") as source:
                 data = json.load(source)
             self.verbs = set(data.get("verbs", ()))
             self.nominals = set(data.get("nominals", ()))
+            self.adjectives = set(data.get("adjectives", ()))
+            self.degree_forms = set(data.get("degree_forms", ()))
         except (OSError, ValueError):
             # Keep the extension loadable if the generated data file is absent.
             pass
@@ -103,6 +110,11 @@ class LilakPreferredSpellchecker(
         error.aProperties = (color,)
         return error
 
+    @staticmethod
+    def _degree_form(stem, suffix):
+        separator = "" if stem and stem[-1] in UNJOINABLE_ENDINGS else ZWNJ
+        return stem + separator + suffix
+
     def _find_errors(self, text, sentence_start, sentence_end):
         errors = []
         tokens = list(TOKEN_RE.finditer(text))
@@ -118,10 +130,28 @@ class LilakPreferredSpellchecker(
                 start, end - start, rule_id, suggestion, comment
             ))
 
-        # Prefixes are part of verbs. A separate Hunspell word check cannot
-        # distinguish "می شود" from two individually valid words.
+        # Prefixes and suffixes are checked with lexical POS data so ordinary
+        # words that merely share the same ending are left alone.
         for index, token in enumerate(tokens):
             word = token.group(0)
+
+            for suffix in DEGREE_SUFFIXES:
+                if word.endswith(ZWNJ + suffix):
+                    stem = word[:-len(ZWNJ + suffix)]
+                    if stem in self.adjectives:
+                        add(token.start(), token.end(), "lilak-degree-suffix",
+                            self._degree_form(stem, suffix),
+                            "پسوند تفضیلی/عالی با جداکنندهٔ درست نوشته می‌شود.")
+                        break
+                elif word.endswith(suffix):
+                    stem = word[:-len(suffix)]
+                    if (stem in self.adjectives
+                            and word not in self.degree_forms
+                            and word not in DEGREE_EXCEPTIONS):
+                        add(token.start(), token.end(), "lilak-degree-suffix",
+                            self._degree_form(stem, suffix),
+                            "پسوند تفضیلی/عالی با جداکنندهٔ درست نوشته می‌شود.")
+                        break
 
             attached_suggestion = DEMONSTRATIVE_ATTACHED_FORMS.get(word)
             if attached_suggestion:
@@ -163,6 +193,15 @@ class LilakPreferredSpellchecker(
                             "lilak-har-compound",
                             "هر" + next_word,
                             "این صورتِ واژگانی‌شده با «هر» پیوسته نوشته می‌شود.")
+
+                if gap and gap.isspace() and next_word in {"تر", "ترین"}:
+                    if (word in self.adjectives
+                            and word + next_word not in self.degree_forms
+                            and word + next_word not in DEGREE_EXCEPTIONS):
+                        add(token.start(), next_token.end(),
+                            "lilak-degree-suffix",
+                            self._degree_form(word, next_word),
+                            "پسوند تفضیلی/عالی با جداکنندهٔ درست نوشته می‌شود.")
 
                 if gap and gap.isspace() and word in MI_PREFIXES:
                     verb = next_word
