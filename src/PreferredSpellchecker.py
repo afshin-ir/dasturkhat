@@ -19,6 +19,13 @@ HA_SUFFIXES = (
 )
 MI_PREFIXES = ("نمی", "همی", "می")
 EMPHATIC_HAMI_FOLLOWING = {"نیست"}
+DEMONSTRATIVE_ATTACHED_FORMS = {
+    "اینطور": "این" + ZWNJ + "طور",
+    "آنطور": "آن" + ZWNJ + "طور",
+    "اینگونه": "این" + ZWNJ + "گونه",
+    "آنگونه": "آن" + ZWNJ + "گونه",
+}
+DEMONSTRATIVE_PARTS = {"طور", "گونه"}
 
 
 class LilakPreferredSpellchecker(
@@ -112,6 +119,12 @@ class LilakPreferredSpellchecker(
         for index, token in enumerate(tokens):
             word = token.group(0)
 
+            attached_suggestion = DEMONSTRATIVE_ATTACHED_FORMS.get(word)
+            if attached_suggestion:
+                add(token.start(), token.end(), "lilak-demonstrative-compound",
+                    attached_suggestion,
+                    "این ترکیب با نیم‌فاصله نوشته می‌شود.")
+
             for prefix in MI_PREFIXES:
                 if word.startswith(prefix) and ZWNJ not in word:
                     stem = word[len(prefix):]
@@ -123,19 +136,27 @@ class LilakPreferredSpellchecker(
 
             if index + 1 < len(tokens):
                 next_token = tokens[index + 1]
+                next_word = next_token.group(0)
                 gap = text[token.end():next_token.start()]
+
+                if gap and gap.isspace() and word in {"این", "آن"}:
+                    if next_word in DEMONSTRATIVE_PARTS:
+                        add(token.start(), next_token.end(),
+                            "lilak-demonstrative-compound",
+                            word + ZWNJ + next_word,
+                            "این ترکیب با نیم‌فاصله نوشته می‌شود.")
+
                 if gap and gap.isspace() and word in MI_PREFIXES:
-                    verb = next_token.group(0)
+                    verb = next_word
                     if verb in self.verbs and not (
                         word == "همی" and verb in EMPHATIC_HAMI_FOLLOWING
                     ):
-                        prefix = word
                         add(token.start(), next_token.end(),
                             "lilak-mi-prefix",
-                            prefix + ZWNJ + verb,
+                            word + ZWNJ + verb,
                             "پیشوند فعلی با نیم‌فاصله نوشته می‌شود.")
 
-                if gap and gap.isspace() and next_token.group(0) == "ها":
+                if gap and gap.isspace() and next_word == "ها":
                     if word in self.nominals:
                         add(token.start(), next_token.end(),
                             "lilak-plural-ha",
