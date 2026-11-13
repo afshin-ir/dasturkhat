@@ -1,114 +1,69 @@
-# Lilak, Persian Spell Checking Dictionary
-  [![Build Status](https://travis-ci.com/b00f/lilak.svg?branch=master)](https://travis-ci.com/b00f/lilak)
-  [![Donate](https://img.shields.io/badge/support-patreon-F96854.svg?style=flat-square)](https://patreon.com/b00f)
+# Lilak — Persian Spell-Checking Dictionary
 
-[Lilak](https://github.com/b00f/lilak) is an open source project for generating Persian dictionary for [hunspell](https://github.com/hunspell/hunspell) spell checker based on Persian Morphology.
+[فارسی](README.fa.md)
 
-In Persian language affixes can change the meaning of the word. Some suffixes attached to a word as short form of verbs. Part-of-speech plays an important role in Persian language. In some cases the pronunciation of the word can change the suffixes. Check the code for more information.
+Lilak builds a Persian Hunspell dictionary from a lexicon tagged with part of speech and Persian morphology. This repository also provides an optional LibreOffice Writer extension that checks selected Academy-preferred Persian spellings.
 
-Lilak has a [lexicon](http://lilak-project.com) of Persian words with part-of-speech tags. Lilak builds a dictionary for hunspell to predict the best form of compound words based on morphological rules.
+## Academy-preferred orthography in LibreOffice Writer
 
-## Content
+Version **3.16** adds a separate, offline proofreader for LibreOffice Writer. It works alongside Hunspell: Hunspell checks whether words are spelled correctly, while the Lilak proofreader flags selected departures from the preferred spellings in the second edition of the Academy of Persian Language and Literature's *Dastur-e Khat-e Farsi*.
 
-```text
-lilak
-  |-- build           : Build folder. Compiled dictionary goes here.
-  |
-  |-- src
-  |   |-- data
-  |   |   |-- lexicon       : Lexicon of Persian words with part-of-speech tags
-  |   |   |-- affixes       : Affix (prefix or suffix) rules
-  |   |   |-- dic_users     : List of words without POS tag.
-  |   |   \-- verbs.htm     : List of Persian verbs (unstemmed)
-  |   |
-  |   |-- lilak.py    : Python script for building lilak dictionary
-  |   \-- test.py     : Python script to test lilak accuracy
-  |
-  |-- test
-  |   |-- text1       : "Farsi(Persian) is Sugar", A short story by Mohammad-Ali Jamalzadeh
-  |   |-- text2       : "A Hekayat" By Saadi
-  |   |-- text3       : "A Ghazal" By Hafez
-  |   |-- text4       : "Yazdgerd Kingdom" By Ferdowsi
-  |   |-- text5       : "A Ghazal" By Muhammad Husayn Tabataba'i
-  |   |-- text6       : "Have a Safe Trip" A poem by Shafii Kadkani
-  |   |-- text7       : "Se Tar" A short story by Jalal Al-e-Ahmad
-  |   |-- text8       : "End of Shahname" By Mehdi Akhavan-Sales
-  |   |-- text9       : "The Water"s Footsteps" By Sohrab Sepehri
-  |   |-- text10      : "Nei Name" By Rumi
-  |   \-- verbs       : Some inflected verbs
-  |
-  |-- README.md       :
-  \-- LICENCE         : License file
+The Writer extension uses the grammar-checking interface to underline a flagged form and offer a replacement. Its current rules include:
+
+- **Verb prefixes:** checks attached and separated forms of *mi*, *nemi*, and *hami* with known verbs. It also handles the verb prefixes *b*, *n*, and *m*, including listed spelling changes before verbs beginning with alef or alef-madda.
+- **Plural suffix *-ha*:** recommends the half-space spelling for recognized nouns, including listed examples involving foreign words, proper names, silent *h*, and long stems.
+- **Lexicalized compounds:** checks listed forms with *har*, *hich*, *hamin/haman*, and *in/an + tor/gune*.
+- **Question words and the object marker *ra*:** repairs selected attached forms when the following or preceding lexical base is known.
+- **Productive affixes:** checks *-tar/-tarin*, *-var*, *-san*, *-asa*, *-agin*, *-bare*, *-jat*, *-fam*, *-vesh*, *-gar/-gari*, *-vare*, *-khane/-name*, and numeral suffix *-gane*, using lexical data and listed exceptions.
+- **Prefixes and compound words:** checks listed attached and half-spaced prefixes, plus selected repeated, coordinated, descriptive, proper-name, and multiword compounds.
+- **Preferred word forms:** includes **212 direct replacements** drawn from the book's general-word and proper-name spelling tables and its explicit examples.
+- **Multiword expressions:** includes **110 phrase patterns** for selected compound prepositions, conjunctions, and other examples. A phrase is matched only when its listed parts occur consecutively with full spaces between them.
+
+The data is stored in [`src/data/preferred-spellings.json`](src/data/preferred-spellings.json). The full rule-by-rule scope and limitations are documented in the [Persian orthography report](REPORT_dastur-khat-fa.md).
+
+### Scope and limitations
+
+This is a spelling and orthography checker, not a grammar or meaning analyzer. It cannot reliably resolve context-sensitive choices such as the roles of *in/an*, *che*, *ra*, or *ke* in every sentence. Ambiguous table entries, historical spellings, and open-ended Arabic expressions are not all converted automatically. The extension checks only rules and examples that can be recognized safely from the token and available lexical data.
+
+### Enable it in Writer
+
+Install the `.oxt` extension, then open **Tools → Options → Languages and Locales → Writing Aids**. Enable **Check spelling as you type** and **Check grammar as you type**, and set the text language to Persian. Hunspell remains responsible for ordinary spell checking; the Lilak proofreader supplies these preferred-orthography checks separately.
+
+### Build the LibreOffice extension
+
+With Python 3 and the repository data available, run:
+
+```bash
+make libreoffice
 ```
 
-## Building Dictionary
+The package is written to `build/fa-IR-dictionary.oxt`. The repository's GitHub Actions workflow builds this package on pushes to the orthography branch.
 
-Before using lilak please make sure you have install python 3.x.
+## Build the Hunspell dictionary
 
-To build the lilak dictionary, run lilak.py from `src` folder:
+Run the following commands from the repository root:
 
 ```bash
 make build
 make test
 ```
 
-You can find the compiled dictionary at the `build` folder.
+The generated `.dic` and `.aff` files are written to `build/`. The source lexicon is in `src/data/lexicon`; it contains Persian words with part-of-speech tags and other morphological information.
 
-check [result.log](./test/result.log) for test result.
+## Use the Hunspell dictionary
 
-## How to contribute
+- Compiled Lilak dictionaries are available from the [upstream Lilak releases](https://github.com/b00f/lilak/releases/).
+- In Firefox, install the [Lilak Persian Dictionary](https://addons.mozilla.org/en-US/firefox/addon/lilak-persian-dictionary/).
+- In Chrome, add Persian under language settings and enable spell checking.
 
-The best way you can contribute on this project is collecting words with correct part-of-speech tags.
-Part-of-speech is important to build Lilak. It should classified in main types like: verb, noun, adjective, etc. Also some other tags will be useful. like tense of verb, singular or plural, etc.
-Check the `src/data/lexicon` for more information
+## Contribute
 
-Please open an issue if you find any mistakes while using lilak.
+Useful contributions include Persian words with accurate part-of-speech and morphological tags. See `src/data/lexicon` for the lexicon format. Please report dictionary or rule issues in the repository's issue tracker.
 
-## Using Lilak
+## Project history and license
 
-- You can find compiled dictionaries [here](https://github.com/b00f/lilak/releases/).
-- Mozilla Firefox: Install lilak extension from here [here](https://addons.mozilla.org/en-US/firefox/addon/lilak-persian-dictionary/).
-- Google Chrome: Go to Settings, find Language and input settings, add Persian language and make sure you have enabled the spell checker option.
+Lilak is an open-source project based on Persian morphology. Its name comes from Persian *lilak*, a variant of *nilak* (“bluish”). The project honors Abolhassan Najafi, an associate member of the Academy of Persian Language and Literature and author of *Ghalat Nanevisim*.
 
-## Supporting Lilak
-If you like this project, please [donate](http://lilak-project.com/donate.php) or consider becoming a patron:
+Lilak is distributed under the Apache License 2.0. See [`LICENSE`](LICENSE) for the full license text.
 
-[![Become a patron](https://c5.patreon.com/external/logo/become_a_patron_button.png)](https://patreon.com/b00f)
-
-## License
-Lilak is published under Apache licence. You may freely use, reproduce, modify or distribute it. If you think lilak is useful please support it.
-
-## About the Name
-
-*lilac* in English came from French lilac "shrub of genus Syringa with mauve flowers"
-from Spanish lilac, from Arabic *lilak*, from Persian *lilak*, variant of nilak "bluish"
-
-## In Memory of Abolhassan Najafi
-
-[Abolhassan Najafi](https://en.wikipedia.org/wiki/Abolhassan_Najafi) was an associate member of Iran's Academy of Persian Language and Literature. His most famous books is "Ghalat Nanevisim" (Let’s not write incorrect).
-
-
-## Thanks
-
-Special thanks to
-
-- Dr. Hamid Farrroukh : [alefbaye2om](http://alefbaye2om.org/)
-- Dr. Hamid Hassani : [wikipedia](https://en.wikipedia.org/wiki/Hamid_Hassani)
-- Dr. Reza Moshksar : [github](https://github.com/reza1615)
-- 5j9 : [github](https://github.com/5j9)
-
-## بررسی رسم‌الخط مرجّح در LibreOffice Writer
-
-این شاخه یک افزونهٔ جداگانه برای بررسی برخی صورت‌های نامرجّح در Writer دارد. افزونه در کنار Hunspell کار می‌کند و از سازوکار بررسی دستور زبان Writer برای نشان‌دادن زیرخط قرمز و پیشنهاد صورت مرجّح استفاده می‌کند. مرجع قواعد، کتاب *دستور خط فارسی* فرهنگستان زبان و ادب فارسی، ویراست دوم است.
-
-دامنهٔ قواعد پیاده‌شده شامل این گروه‌هاست:
-
-- پیشوندهای فعلی «می/نمی/همی» و پیشوندهای فعلی «ب/ن/م»، با رعایت نمونه‌های تغییر الف و استثنای تأکیدی «همی».
-- پسوند جمع «ها»، صورت‌های واژگانی‌شده با «هر/هیچ/همین/همان»، و ترکیب‌های «این/آن + طور/گونه».
-- پسوندهای «تر/ترین»، «ـوار/ـسان/ـآسا/ـآگین/ـباره/ـجات/ـفام/ـوش»، «ـگر/ـگری»، «ـواره»، «ـخانه/ـنامه» و «ـگانه» در جاهایی که دادهٔ واژگانی برای تشخیص پایه وجود دارد.
-- پیشوندها و پیشوندواره‌های نیم‌فاصله‌دار یا پیوسته، همراه با فهرست استثناهای واژگانی و فعل‌های شناخته‌شده.
-- چند ترکیبِ چندواژه‌ایِ صریحاً مثال‌زده‌شده در کتاب، از جمله حروف اضافه و ربط مرکّب؛ و صورت‌های املایی جدول‌های واژه‌های چنداملاییِ عام و نام‌های خاص.
-
-فهرست ۲۱۲ جایگزینیِ مستقیم و ۱۱۰ الگوی عبارتِ چندواژه‌ای در `src/data/preferred-spellings.json` نگهداری می‌شود. گزارش جزئیِ دامنه و محدودیت‌ها در [گزارش قواعد رسم‌الخط مرجّح](./REPORT_dastur-khat-fa.md) آمده است. اصلاح خودکار فقط برای مواردی انجام می‌شود که از شکل نوشتاری و داده‌های واژگانی بتوان تشخیص داد. واژه‌های هم‌نویسه با معنی‌های متفاوت، نقش‌های دستوریِ وابسته به جمله، همهٔ عبارت‌های عربی و همهٔ ترکیب‌های ممکن پوشش داده نمی‌شوند؛ برای همین این افزونه جایگزین ویراستار یا بررسی معنایی نیست.
-
-برای دیدن زیرخط هنگام تایپ، گزینه‌های «بررسی املا هنگام تایپ» و «بررسی دستور زبان هنگام تایپ» باید روشن باشند و زبان متن در Writer فارسی باشد.
+Special thanks to Dr. Hamid Farrroukh, Dr. Hamid Hassani, Dr. Reza Moshksar, and 5j9 for their work on Persian language resources.
