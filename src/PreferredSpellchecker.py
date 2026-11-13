@@ -26,6 +26,10 @@ DEMONSTRATIVE_ATTACHED_FORMS = {
     "آنگونه": "آن" + ZWNJ + "گونه",
 }
 DEMONSTRATIVE_PARTS = {"طور", "گونه"}
+HARE_COMPOUND_STEMS = {
+    "آینه", "ازگاهی", "چند", "طور", "کدام", "کس", "که", "گاه", "گونه", "یک",
+}
+HARE_COMPOUND_FORMS = {"هر" + stem for stem in HARE_COMPOUND_STEMS}
 
 
 class LilakPreferredSpellchecker(
@@ -125,6 +129,13 @@ class LilakPreferredSpellchecker(
                     attached_suggestion,
                     "این ترکیب با نیم‌فاصله نوشته می‌شود.")
 
+            # The book treats these lexicalized forms of "هر" as one word.
+            normalized_hare = word.replace(ZWNJ, "")
+            if ZWNJ in word and normalized_hare in HARE_COMPOUND_FORMS:
+                add(token.start(), token.end(), "lilak-har-compound",
+                    normalized_hare,
+                    "این صورتِ واژگانی‌شده با «هر» پیوسته نوشته می‌شود.")
+
             for prefix in MI_PREFIXES:
                 if word.startswith(prefix) and ZWNJ not in word:
                     stem = word[len(prefix):]
@@ -145,6 +156,13 @@ class LilakPreferredSpellchecker(
                             "lilak-demonstrative-compound",
                             word + ZWNJ + next_word,
                             "این ترکیب با نیم‌فاصله نوشته می‌شود.")
+
+                if gap and gap.isspace() and word == "هر":
+                    if next_word in HARE_COMPOUND_STEMS:
+                        add(token.start(), next_token.end(),
+                            "lilak-har-compound",
+                            "هر" + next_word,
+                            "این صورتِ واژگانی‌شده با «هر» پیوسته نوشته می‌شود.")
 
                 if gap and gap.isspace() and word in MI_PREFIXES:
                     verb = next_word
