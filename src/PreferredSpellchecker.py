@@ -67,6 +67,11 @@ WAR_SUFFIX_EXCEPTIONS = {
 SAN_SUFFIX_EXCEPTIONS = {"همسان", "یکسان"}
 CONDITIONAL_ZWNJ_SUFFIXES = ("گری", "گر")
 CONDITIONAL_ZWNJ_ROOTS = {"توجیه", "لاابالی"}
+JOINED_LEXICALIZED_SUFFIX_EXCEPTIONS = {
+    "سفارتخانه", "غسالخانه", "کتابخانه", "گلخانه", "میخانه",
+    "اساسنامه", "بخشنامه", "دانشنامه", "سالنامه", "شاهنامه",
+    "فصلنامه", "قطعنامه", "قولنامه", "ماهنامه",
+}
 BI_PREFIX_ATTACHED_EXAMPLES = {
     "بیچونوچرا": "بی" + ZWNJ + "چون" + ZWNJ + "و" + ZWNJ + "چرا",
     "بیچون" + ZWNJ + "وچرا": "بی" + ZWNJ + "چون" + ZWNJ + "و" + ZWNJ + "چرا",
@@ -123,6 +128,7 @@ class LilakPreferredSpellchecker(
         self.verbs = set()
         self.nominals = set()
         self.adjectives = set()
+        self.numerals = set()
         self.degree_forms = set()
         data_path = os.path.join(os.path.dirname(__file__), "preferred-data.json")
         try:
@@ -131,6 +137,7 @@ class LilakPreferredSpellchecker(
             self.verbs = set(data.get("verbs", ()))
             self.nominals = set(data.get("nominals", ()))
             self.adjectives = set(data.get("adjectives", ()))
+            self.numerals = set(data.get("numerals", ()))
             self.degree_forms = set(data.get("degree_forms", ()))
         except (OSError, ValueError):
             # Keep the extension loadable if the generated data file is absent.
@@ -273,6 +280,50 @@ class LilakPreferredSpellchecker(
                         add(token.start(), token.end(), "lilak-ger-suffix",
                             stem + ZWNJ + suffix,
                             "پسوند «گر/گری» در این صورت با نیم‌فاصله نوشته می‌شود.")
+                    break
+
+            # The productive suffixoids "-خانه/-نامه" take a ZWNJ,
+            # except for the lexicalized joined forms named by the Academy.
+            for suffix in ("خانه", "نامه"):
+                if word.endswith(ZWNJ + suffix):
+                    stem = word[:-len(ZWNJ + suffix)]
+                    joined = stem + suffix
+                    if joined in JOINED_LEXICALIZED_SUFFIX_EXCEPTIONS:
+                        add(token.start(), token.end(), "lilak-house-name-suffix",
+                            joined,
+                            "این واژه از استثناهای پیوسته‌نویسیِ «خانه/نامه» است.")
+                    break
+                elif word.endswith(suffix):
+                    stem = word[:-len(suffix)]
+                    if (stem in lexical_roots
+                            and word not in JOINED_LEXICALIZED_SUFFIX_EXCEPTIONS):
+                        add(token.start(), token.end(), "lilak-house-name-suffix",
+                            stem + ZWNJ + suffix,
+                            "پسوندوارهٔ «خانه/نامه» با نیم‌فاصله نوشته می‌شود.")
+                    break
+
+            # Numerals take a ZWNJ before "-گانه"; the connective-letter
+            # exception is handled by _degree_form.
+            if word.endswith(ZWNJ + "گانه"):
+                stem = word[:-len(ZWNJ + "گانه")]
+                if stem in self.numerals:
+                    suggestion = self._degree_form(stem, "گانه")
+                    if suggestion != word:
+                        add(token.start(), token.end(), "lilak-numeral-gane",
+                            suggestion, "پسوند «گانه» پس از عدد جدا نوشته می‌شود.")
+            elif word.endswith("گانه"):
+                stem = word[:-len("گانه")]
+                if stem in self.numerals:
+                    add(token.start(), token.end(), "lilak-numeral-gane",
+                        self._degree_form(stem, "گانه"),
+                        "پسوند «گانه» پس از عدد جدا نوشته می‌شود.")
+
+            # The ordinal forms of "سی" use a ZWNJ.
+            for suffix in ("امین", "امی", "ام"):
+                if word.endswith(suffix) and word[:-len(suffix)] == "سی":
+                    add(token.start(), token.end(), "lilak-thirty-ordinal",
+                        "سی" + ZWNJ + suffix,
+                        "صورت‌های ترتیبیِ ساخته‌شده با «سی» نیم‌فاصله می‌گیرند.")
                     break
 
             # The suffix "-واره" is written attached.
@@ -422,6 +473,11 @@ class LilakPreferredSpellchecker(
                         add(token.start(), next_token.end(), "lilak-be-verb-prefix",
                             suggestion,
                             "این پیشوند فعلی به فعل می‌چسبد و گاهی شکل آغاز فعل را تغییر می‌دهد.")
+
+                if gap and gap.isspace() and word == "سی" and next_word in {"ام", "امی", "امین"}:
+                    add(token.start(), next_token.end(), "lilak-thirty-ordinal",
+                        "سی" + ZWNJ + next_word,
+                        "صورت‌های ترتیبیِ ساخته‌شده با «سی» نیم‌فاصله می‌گیرند.")
 
                 if gap and gap.isspace() and word == "بی":
                     if next_word in BI_PREFIX_SPACE_BASES:
