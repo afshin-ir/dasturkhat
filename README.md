@@ -1,12 +1,12 @@
-# Lilak — Persian Spell-Checking Dictionary
+# Dastoorkhat — Persian Spell Checking and Preferred Orthography
 
-[![صفحهٔ فارسی افزونهٔ لیلک](assets/readme-fa-button.png)](README.fa.md)
+[صفحهٔ فارسی افزونهٔ دستورخط](README.fa.md)
 
-Lilak builds a Persian Hunspell dictionary from a lexicon tagged with part of speech and Persian morphology. This repository also provides an optional LibreOffice Writer extension that checks selected Academy-preferred Persian spellings.
+Dastoorkhat provides an optional LibreOffice Writer extension for checking Academy-preferred Persian spellings, alongside its Persian Hunspell dictionary. This project continues Afshin Falatouni’s fork of the upstream Lilak dictionary, which supplies the morphological data and Hunspell spell-checking foundation.
 
 ## Academy-preferred orthography in LibreOffice Writer
 
-Version **3.16** adds a separate, offline proofreader for LibreOffice Writer. It works alongside Hunspell: Hunspell checks whether words are spelled correctly, while the Lilak proofreader flags selected departures from the preferred spellings in the second edition of the Academy of Persian Language and Literature's *Dastur-e Khat-e Farsi*.
+Version **3.16** adds a separate, offline proofreader for LibreOffice Writer. It works alongside Hunspell: Hunspell checks whether words are spelled correctly, while the Dastoorkhat proofreader flags selected departures from the preferred spellings in the second edition of the Academy of Persian Language and Literature's *Dastur-e Khat-e Farsi*.
 
 The Writer extension uses the grammar-checking interface to underline a flagged form and offer a replacement. Its current rules include:
 
@@ -27,7 +27,7 @@ This is a spelling and orthography checker, not a grammar or meaning analyzer. I
 
 ### Enable it in Writer
 
-Install the `.oxt` extension, then open **Tools → Options → Languages and Locales → Writing Aids**. Enable **Check spelling as you type** and **Check grammar as you type**, and set the text language to Persian. Hunspell remains responsible for ordinary spell checking; the Lilak proofreader supplies these preferred-orthography checks separately.
+Install the `.oxt` extension, then open **Tools → Options → Languages and Locales → Writing Aids**. Enable **Check spelling as you type** and **Check grammar as you type**, and set the text language to Persian. Hunspell remains responsible for ordinary spell checking; the Dastoorkhat proofreader supplies these preferred-orthography checks separately.
 
 ### Build the LibreOffice extension
 
@@ -52,8 +52,8 @@ The generated `.dic` and `.aff` files are written to `build/`. The source lexico
 
 ## Use the Hunspell dictionary
 
-- Compiled Lilak dictionaries are available from the [upstream Lilak releases](https://github.com/b00f/lilak/releases/).
-- In Firefox, install the [Lilak Persian Dictionary](https://addons.mozilla.org/en-US/firefox/addon/lilak-persian-dictionary/).
+- The upstream Lilak Hunspell dictionary is available from [Lilak releases](https://github.com/b00f/lilak/releases/).
+- In Firefox, install the upstream [Lilak Persian Dictionary](https://addons.mozilla.org/en-US/firefox/addon/lilak-persian-dictionary/).
 - In Chrome, add Persian under language settings and enable spell checking.
 
 ## Contribute
@@ -62,8 +62,8 @@ Useful contributions include Persian words with accurate part-of-speech and morp
 
 ## Project history and license
 
-Lilak is an open-source project based on Persian morphology. Its name comes from Persian *lilak*, a variant of *nilak* (“bluish”). The project honors Abolhassan Najafi, an associate member of the Academy of Persian Language and Literature and author of *Ghalat Nanevisim*.
+Dastoorkhat is an open-source project inspired by the title of the Academy of Persian Language and Literature’s book *Dastur-e Khat-e Farsi*. It continues the Persian morphology work of the upstream Lilak project and honors Abolhassan Najafi, an associate member of the Academy and author of *Ghalat Nanevisim*.
 
-Lilak is distributed under the Apache License 2.0. See [`LICENSE`](LICENSE) for the full license text.
+Dastoorkhat is distributed under the Apache License 2.0. See [`LICENSE`](LICENSE) for the full license text.
 
 Special thanks to Dr. Hamid Farrroukh, Dr. Hamid Hassani, Dr. Reza Moshksar, and 5j9 for their work on Persian language resources.
