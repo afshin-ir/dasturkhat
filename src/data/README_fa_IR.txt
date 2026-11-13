@@ -1,5 +1,9 @@
-Source
-======
+Dastoorkhat project
+===================
+https://github.com/afshin-ir/dastoorkhat
+
+Upstream source
+===============
 https://github.com/b00f/lilak
 
 License
