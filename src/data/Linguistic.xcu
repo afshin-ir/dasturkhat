@@ -4,7 +4,7 @@
     oor:name="Linguistic" oor:package="org.openoffice.Office">
     <node oor:name="ServiceManager">
         <node oor:name="GrammarCheckers">
-            <node oor:name="org.openoffice.comp.pyuno.DastoorkhatPreferred" oor:op="fuse">
+            <node oor:name="org.openoffice.comp.pyuno.DasturkhatPreferred" oor:op="fuse">
                 <prop oor:name="Locales" oor:type="oor:string-list">
                     <value>fa-IR</value>
                 </prop>
