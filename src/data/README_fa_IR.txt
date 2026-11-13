@@ -22,13 +22,13 @@ limitations under the License.
 
 README
 ======
-Lilak is an open source project for generating Persian dictionary for hunspell spell checker based on Persian Morphology.
+Dastoorkhat provides Academy-preferred Persian orthography checks in LibreOffice Writer. Its Hunspell dictionary is based on the upstream Lilak project and Persian morphology.
 This dictionary is free and the source is available under Apache License Version 2.0.
 
-بررسی رسم‌الخط مرجّح در LibreOffice Writer
+دستورخط؛ بررسی رسم‌الخط مرجّح در LibreOffice Writer
 ==========================================
 
-بستهٔ OXT، افزون‌بر فرهنگ املایی هان‌اسپل، یک بررسی‌کنندهٔ آفلاین برای
+افزونهٔ دستورخط، افزون‌بر فرهنگ املایی هان‌اسپل، یک بررسی‌کنندهٔ آفلاین برای
 برخی صورت‌های نامرجّحِ دستور خط دارد. این بررسی‌کننده از زیرسامانهٔ بررسی
 دستور زبان Writer استفاده می‌کند و صورت مرجّح را برای جایگزینی پیشنهاد می‌دهد.
 مرجع قواعد کتاب «دستور خط فارسی» فرهنگستان زبان و ادب فارسی، ویراست دوم است.
