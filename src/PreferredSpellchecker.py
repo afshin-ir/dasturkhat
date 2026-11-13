@@ -43,6 +43,16 @@ HARE_COMPOUND_STEMS = {
 HARE_COMPOUND_FORMS = {"هر" + stem for stem in HARE_COMPOUND_STEMS}
 HIC_COMPOUND_STEMS = {"کدام", "کس", "گاه", "گونه", "یک"}
 HIC_COMPOUND_FORMS = {"هیچ" + ZWNJ + stem for stem in HIC_COMPOUND_STEMS}
+ZWNJ_COMPOUND_PREFIXES = ("برون", "بوم", "تک", "درون", "زیست", "میان", "نیم")
+ZWNJ_PREFIX_ATTACHED_EXAMPLES = {
+    "برونمرزی": "برون" + ZWNJ + "مرزی",
+    "بومشناسی": "بوم" + ZWNJ + "شناسی",
+    "تکدرس": "تک" + ZWNJ + "درس",
+    "درونمداری": "درون" + ZWNJ + "مداری",
+    "زیستفناوری": "زیست" + ZWNJ + "فناوری",
+    "میانواکه" + ZWNJ + "ای": "میان" + ZWNJ + "واکه" + ZWNJ + "ای",
+    "نیمبند": "نیم" + ZWNJ + "بند",
+}
 HAM_PREFIX_EXCEPTIONS = {
     "هماره", "همان", "هماورد", "هماهنگ", "همایش", "همباز", "همتا",
     "همچنان", "همچنین", "همچو", "همچون", "همدل", "همدم", "همدیگر",
@@ -181,6 +191,29 @@ class LilakPreferredSpellchecker(
                 add(token.start(), token.end(), "lilak-same-demonstrative",
                     same_suggestion,
                     "این ترکیب با نیم‌فاصله نوشته می‌شود.")
+
+            # Repair common attached forms of prefixes that the Academy
+            # writes with a ZWNJ, then generalize only when the base is known
+            # and the whole attached token is not an independent dictionary word.
+            prefix_suggestion = ZWNJ_PREFIX_ATTACHED_EXAMPLES.get(word)
+            if prefix_suggestion:
+                add(token.start(), token.end(), "lilak-compound-prefix",
+                    prefix_suggestion,
+                    "این پیشوندواره با نیم‌فاصله نوشته می‌شود.")
+            else:
+                lexical_roots = self.nominals | self.adjectives
+                for compound_prefix in ZWNJ_COMPOUND_PREFIXES:
+                    if not word.startswith(compound_prefix):
+                        continue
+                    rest = word[len(compound_prefix):]
+                    if not rest or rest[0] == ZWNJ:
+                        break
+                    base = rest.split(ZWNJ, 1)[0]
+                    if word not in lexical_roots and base in lexical_roots:
+                        add(token.start(), token.end(), "lilak-compound-prefix",
+                            compound_prefix + ZWNJ + rest,
+                            "این پیشوندواره با نیم‌فاصله نوشته می‌شود.")
+                    break
 
             # Productive "همـ" compounds use ZWNJ; lexicalized exceptions
             # listed by the Academy stay joined. Only attached inputs are checked,
