@@ -20,6 +20,7 @@ libreoffice: build
 	cp ./build/fa-IR.aff  ./build/libre/fa-IR.aff
 	cp ./LICENSE ./build/libre/LICENSE
 	cp ./icon.png ./build/libre/icon.png
+	cp ./src/data/package-description.txt ./build/libre/package-description.txt
 	cp ./src/data/META-INF/manifest.xml ./build/libre/META-INF/manifest.xml
 	cp ./src/PreferredSpellchecker.py ./build/libre/PreferredSpellchecker.py
 	cp ./src/data/Linguistic.xcu ./build/libre/Linguistic.xcu
