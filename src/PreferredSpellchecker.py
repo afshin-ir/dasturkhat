@@ -62,6 +62,18 @@ BI_PREFIX_ATTACHED_EXAMPLES = {
     "بیچونوچرا": "بی" + ZWNJ + "چون" + ZWNJ + "و" + ZWNJ + "چرا",
     "بیچون" + ZWNJ + "وچرا": "بی" + ZWNJ + "چون" + ZWNJ + "و" + ZWNJ + "چرا",
 }
+BE_HALFSPACE_ATTACHED_FORMS = {
+    "بهخصوص": "به" + ZWNJ + "خصوص",
+    "بخصوص": "به" + ZWNJ + "خصوص",
+    "بهسختی": "به" + ZWNJ + "سختی",
+    "بسختی": "به" + ZWNJ + "سختی",
+    "بهجهت": "به" + ZWNJ + "جهت",
+    "بجهت": "به" + ZWNJ + "جهت",
+    "بهمحض": "به" + ZWNJ + "محض",
+    "بمحض": "به" + ZWNJ + "محض",
+    "بهموجب": "به" + ZWNJ + "موجب",
+    "بموجب": "به" + ZWNJ + "موجب",
+}
 ZWNJ_COMPOUND_PREFIXES = ("برون", "بوم", "تک", "درون", "زیست", "میان", "نیم")
 ZWNJ_PREFIX_ATTACHED_EXAMPLES = {
     "برونمرزی": "برون" + ZWNJ + "مرزی",
@@ -161,6 +173,16 @@ class LilakPreferredSpellchecker(
         separator = "" if stem and stem[-1] in UNJOINABLE_ENDINGS else ZWNJ
         return stem + separator + suffix
 
+    @staticmethod
+    def _be_verb_form(verb):
+        if verb == "ایست":
+            return "بایست"
+        if verb.startswith("آ"):
+            return "بی" + "ا" + verb[1:]
+        if verb.startswith("ا"):
+            return "بی" + verb[1:]
+        return "ب" + verb
+
     def _find_errors(self, text, sentence_start, sentence_end):
         errors = []
         tokens = list(TOKEN_RE.finditer(text))
@@ -236,6 +258,11 @@ class LilakPreferredSpellchecker(
 
             # Negative prefix "بیـ" uses ZWNJ. Skip lexicalized exceptions,
             # names, and verb forms that only resemble this prefix.
+            be_example = BE_HALFSPACE_ATTACHED_FORMS.get(word)
+            if be_example:
+                add(token.start(), token.end(), "lilak-be-prefix", be_example,
+                    "این ترکیبِ ساخته‌شده با «به» با نیم‌فاصله نوشته می‌شود.")
+
             bi_example = BI_PREFIX_ATTACHED_EXAMPLES.get(word)
             if bi_example:
                 add(token.start(), token.end(), "lilak-bi-prefix", bi_example,
@@ -304,6 +331,16 @@ class LilakPreferredSpellchecker(
                             "lilak-demonstrative-compound",
                             word + ZWNJ + next_word,
                             "این ترکیب با نیم‌فاصله نوشته می‌شود.")
+
+                if gap and gap.isspace() and word == "ب":
+                    if next_word in self.verbs:
+                        add(token.start(), next_token.end(), "lilak-be-verb-prefix",
+                            self._be_verb_form(next_word),
+                            "«ب» پیشوند فعلی است و به فعل می‌چسبد.")
+                    elif next_word == "آموز":
+                        add(token.start(), next_token.end(), "lilak-be-verb-prefix",
+                            "بیاموز",
+                            "در این فعل، «ب» با میانجیِ «ی» به فعل می‌پیوندد.")
 
                 if gap and gap.isspace() and word == "بی":
                     if next_word in BI_PREFIX_SPACE_BASES:
