@@ -37,7 +37,7 @@ With Python 3 and the repository data available, run:
 make libreoffice
 ```
 
-The package is written to `build/fa-IR-dictionary.oxt`. The repository's GitHub Actions workflow builds this package on pushes to the orthography branch.
+The package is written to `build/dastoorkhat-fa-IR.oxt`. The repository's GitHub Actions workflow builds this package on pushes to the orthography branch.
 
 ## Build the Hunspell dictionary
 
