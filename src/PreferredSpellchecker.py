@@ -62,6 +62,12 @@ BI_PREFIX_ATTACHED_EXAMPLES = {
     "بیچونوچرا": "بی" + ZWNJ + "چون" + ZWNJ + "و" + ZWNJ + "چرا",
     "بیچون" + ZWNJ + "وچرا": "بی" + ZWNJ + "چون" + ZWNJ + "و" + ZWNJ + "چرا",
 }
+SINGLE_VERB_PREFIX_EXAMPLES = {
+    ("ب", "آموز"): "بیاموز",
+    ("م", "افکن"): "میفکن",
+    ("م", "آزار"): "میازار",
+    ("ن", "آفرید"): "نیافرید",
+}
 BE_HALFSPACE_ATTACHED_FORMS = {
     "بهخصوص": "به" + ZWNJ + "خصوص",
     "بخصوص": "به" + ZWNJ + "خصوص",
@@ -174,14 +180,14 @@ class LilakPreferredSpellchecker(
         return stem + separator + suffix
 
     @staticmethod
-    def _be_verb_form(verb):
-        if verb == "ایست":
-            return "بایست"
+    def _single_verb_prefix_form(prefix, verb):
+        if verb.startswith("ایست"):
+            return prefix + verb
         if verb.startswith("آ"):
-            return "بی" + "ا" + verb[1:]
+            return {"ب": "بی", "ن": "نی", "م": "می"}[prefix] + "ا" + verb[1:]
         if verb.startswith("ا"):
-            return "بی" + verb[1:]
-        return "ب" + verb
+            return {"ب": "بی", "ن": "نی", "م": "می"}[prefix] + verb[1:]
+        return prefix + verb
 
     def _find_errors(self, text, sentence_start, sentence_end):
         errors = []
@@ -332,15 +338,14 @@ class LilakPreferredSpellchecker(
                             word + ZWNJ + next_word,
                             "این ترکیب با نیم‌فاصله نوشته می‌شود.")
 
-                if gap and gap.isspace() and word == "ب":
-                    if next_word in self.verbs:
+                if gap and gap.isspace() and word in {"ب", "ن", "م"}:
+                    suggestion = SINGLE_VERB_PREFIX_EXAMPLES.get((word, next_word))
+                    if not suggestion and next_word in self.verbs:
+                        suggestion = self._single_verb_prefix_form(word, next_word)
+                    if suggestion:
                         add(token.start(), next_token.end(), "lilak-be-verb-prefix",
-                            self._be_verb_form(next_word),
-                            "«ب» پیشوند فعلی است و به فعل می‌چسبد.")
-                    elif next_word == "آموز":
-                        add(token.start(), next_token.end(), "lilak-be-verb-prefix",
-                            "بیاموز",
-                            "در این فعل، «ب» با میانجیِ «ی» به فعل می‌پیوندد.")
+                            suggestion,
+                            "این پیشوند فعلی به فعل می‌چسبد و گاهی شکل آغاز فعل را تغییر می‌دهد.")
 
                 if gap and gap.isspace() and word == "بی":
                     if next_word in BI_PREFIX_SPACE_BASES:
