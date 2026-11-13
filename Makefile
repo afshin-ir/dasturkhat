@@ -12,19 +12,7 @@ build:
 test:
 	cd src && python3 test.py
 
-extensions: build
-	# mozila xpi
-	rm -rf ./build/mozila ./build/fa-IR-dictionary.xpi
-	mkdir -p ./build/mozila
-	cp ./build/fa-IR.dic  ./build/mozila/fa-IR.dic
-	cp ./build/fa-IR.aff  ./build/mozila/fa-IR.aff
-	cp ./LICENSE ./build/mozila/LICENSE
-	cp ./icon.png ./build/mozila/icon.png
-	cp ./src/data/README_fa_IR.txt ./build/mozila/README_fa_IR.txt
-	cp ./src/data/manifest.json ./build/mozila/manifest.json
-	sed -i 's/%VER%/$(VERSION)/g' ./build/mozila/manifest.json
-	cd ./build/mozila && zip -r ../fa-IR-dictionary.xpi *
-
+libreoffice: build
 	# LibreOffice oxt
 	rm -rf ./build/libre ./build/fa-IR-dictionary.oxt
 	mkdir -p ./build/libre ./build/libre/META-INF
@@ -42,10 +30,24 @@ extensions: build
 	sed -i 's/%VER%/$(VERSION)/g' ./build/libre/description.xml
 	cd ./build/libre && zip -r ../fa-IR-dictionary.oxt *
 
+extensions: build
+	# mozila xpi
+	rm -rf ./build/mozila ./build/fa-IR-dictionary.xpi
+	mkdir -p ./build/mozila
+	cp ./build/fa-IR.dic  ./build/mozila/fa-IR.dic
+	cp ./build/fa-IR.aff  ./build/mozila/fa-IR.aff
+	cp ./LICENSE ./build/mozila/LICENSE
+	cp ./icon.png ./build/mozila/icon.png
+	cp ./src/data/README_fa_IR.txt ./build/mozila/README_fa_IR.txt
+	cp ./src/data/manifest.json ./build/mozila/manifest.json
+	sed -i 's/%VER%/$(VERSION)/g' ./build/mozila/manifest.json
+	cd ./build/mozila && zip -r ../fa-IR-dictionary.xpi *
+	$(MAKE) libreoffice
+
 	# chromium bdic
 	rm -rf ~/chromium ~/depot_tools;
 	git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git ~/depot_tools; \
-	export PATH=${PATH}:${HOME}/depot_tools; \
+	export PATH=$${PATH}:$${HOME}/depot_tools; \
 	mkdir ~/chromium && cd ~/chromium; \
 	fetch --nohooks --no-history chromium; \
 	cd src; \
@@ -55,4 +57,4 @@ extensions: build
 	# building bdic file
 	cd build && ~/chromium/src/out/Debug/convert_dict fa-IR
 
-.PHONY: all build extensions test
+.PHONY: all build extensions libreoffice test
