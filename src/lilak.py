@@ -230,6 +230,34 @@ class Lilak:
             debug('file does not exist: %s' % filename)
             return
 
+    def dump_preferred_checker_data(self, filename):
+        """Export lexical classes used by the LibreOffice preferred-form checker."""
+        import json
+
+        verbs = set()
+        nominals = set()
+        nominal_tags = {
+            'noun_singular', 'noun_plural', 'adjective',
+            'adjective_comparative', 'adjective_superlative',
+            'numeral', 'classifier', 'foreign'
+        }
+        for word, entries in self.dictionary.items():
+            for attrs in entries:
+                if not attrs:
+                    continue
+                pos = attrs[0]
+                if pos.startswith('verb'):
+                    verbs.add(word)
+                if pos in nominal_tags:
+                    nominals.add(word)
+
+        Path(os.path.dirname(filename)).mkdir(parents=True, exist_ok=True)
+        with open(filename, 'w', encoding='utf-8', newline='') as f:
+            json.dump({
+                'verbs': sorted(verbs),
+                'nominals': sorted(nominals)
+            }, f, ensure_ascii=False, separators=(',', ':'))
+
     def dump_dictionary(self, filename):
         debug('dump dictionary')
 
@@ -751,5 +779,6 @@ if __name__ == '__main__':
         lilak.pars_user_dic('./data/dic_users')
         lilak.dump_affixes('../build/fa-IR.aff')
         lilak.dump_dictionary('../build/fa-IR.dic')
+        lilak.dump_preferred_checker_data('../build/fa-IR-preferred.json')
 
     debug('done!')
