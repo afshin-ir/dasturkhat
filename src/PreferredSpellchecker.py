@@ -26,6 +26,14 @@ DEMONSTRATIVE_ATTACHED_FORMS = {
     "آنگونه": "آن" + ZWNJ + "گونه",
 }
 DEMONSTRATIVE_PARTS = {"طور", "گونه"}
+SAME_FORMS_ATTACHED = {
+    "همانجا": "همان" + ZWNJ + "جا",
+    "همینجا": "همین" + ZWNJ + "جا",
+    "همانجور": "همان" + ZWNJ + "جور",
+    "همینجور": "همین" + ZWNJ + "جور",
+    "همانگونه": "همان" + ZWNJ + "گونه",
+    "همینگونه": "همین" + ZWNJ + "گونه",
+}
 UNJOINABLE_ENDINGS = set("اآدذرزژو")
 DEGREE_SUFFIXES = ("ترین", "تر")
 DEGREE_EXCEPTIONS = {"بهتر", "کهتر", "مهتر", "بیشتر", "کمتر", "کلانتر"}
@@ -159,6 +167,12 @@ class LilakPreferredSpellchecker(
             if attached_suggestion:
                 add(token.start(), token.end(), "lilak-demonstrative-compound",
                     attached_suggestion,
+                    "این ترکیب با نیم‌فاصله نوشته می‌شود.")
+
+            same_suggestion = SAME_FORMS_ATTACHED.get(word)
+            if same_suggestion:
+                add(token.start(), token.end(), "lilak-same-demonstrative",
+                    same_suggestion,
                     "این ترکیب با نیم‌فاصله نوشته می‌شود.")
 
             # The book treats these lexicalized forms of "هر" as one word.
