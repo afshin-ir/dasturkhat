@@ -65,6 +65,8 @@ WAR_SUFFIX_EXCEPTIONS = {
     "شهوار", "عیالوار", "ماهوار",
 }
 SAN_SUFFIX_EXCEPTIONS = {"همسان", "یکسان"}
+CONDITIONAL_ZWNJ_SUFFIXES = ("گری", "گر")
+CONDITIONAL_ZWNJ_ROOTS = {"توجیه", "لاابالی"}
 BI_PREFIX_ATTACHED_EXAMPLES = {
     "بیچونوچرا": "بی" + ZWNJ + "چون" + ZWNJ + "و" + ZWNJ + "چرا",
     "بیچون" + ZWNJ + "وچرا": "بی" + ZWNJ + "چون" + ZWNJ + "و" + ZWNJ + "چرا",
@@ -245,6 +247,32 @@ class LilakPreferredSpellchecker(
                             add(token.start(), token.end(), "lilak-productive-suffix",
                                 suggestion,
                                 "این پسوند با جداکنندهٔ مقرر نوشته می‌شود.")
+                    break
+
+            # "-گر/-گری" take a ZWNJ after ط/ظ and in a few
+            # explicitly listed difficult-to-read forms. The book's
+            # pronounced/non-pronounced final-he distinction is not guessed.
+            for suffix in CONDITIONAL_ZWNJ_SUFFIXES:
+                if word.endswith(ZWNJ + suffix):
+                    stem = word[:-len(ZWNJ + suffix)]
+                    needs_zwnj = (stem in CONDITIONAL_ZWNJ_ROOTS
+                                  or (stem and stem[-1] in {"ط", "ظ"}))
+                    if needs_zwnj and stem in lexical_roots:
+                        continue
+                    if (stem in lexical_roots and stem
+                            and stem[-1] not in {"ه", "ی", "ط", "ظ"}):
+                        add(token.start(), token.end(), "lilak-ger-suffix",
+                            stem + suffix,
+                            "پسوند «گر/گری» در این صورت پیوسته نوشته می‌شود.")
+                    break
+                elif word.endswith(suffix):
+                    stem = word[:-len(suffix)]
+                    needs_zwnj = (stem in CONDITIONAL_ZWNJ_ROOTS
+                                  or (stem and stem[-1] in {"ط", "ظ"}))
+                    if needs_zwnj and stem in lexical_roots:
+                        add(token.start(), token.end(), "lilak-ger-suffix",
+                            stem + ZWNJ + suffix,
+                            "پسوند «گر/گری» در این صورت با نیم‌فاصله نوشته می‌شود.")
                     break
 
             # The suffix "-واره" is written attached.
