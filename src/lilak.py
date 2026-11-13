@@ -236,6 +236,8 @@ class Lilak:
 
         verbs = set()
         nominals = set()
+        adjectives = set()
+        degree_forms = set()
         nominal_tags = {
             'noun_singular', 'noun_plural', 'adjective',
             'adjective_comparative', 'adjective_superlative',
@@ -250,12 +252,18 @@ class Lilak:
                     verbs.add(word)
                 if pos in nominal_tags:
                     nominals.add(word)
+                if pos == 'adjective':
+                    adjectives.add(word)
+                if pos in {'adjective_comparative', 'adjective_superlative'}:
+                    degree_forms.add(word)
 
         Path(os.path.dirname(filename)).mkdir(parents=True, exist_ok=True)
         with open(filename, 'w', encoding='utf-8', newline='') as f:
             json.dump({
                 'verbs': sorted(verbs),
-                'nominals': sorted(nominals)
+                'nominals': sorted(nominals),
+                'adjectives': sorted(adjectives),
+                'degree_forms': sorted(degree_forms)
             }, f, ensure_ascii=False, separators=(',', ':'))
 
     def dump_dictionary(self, filename):
