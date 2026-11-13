@@ -120,13 +120,13 @@ HAM_PREFIX_EXCEPTIONS = {
 }
 
 
-class LilakPreferredSpellchecker(
+class DastoorkhatPreferredSpellchecker(
     unohelper.Base, XProofreader, XSupportedLocales,
     XServiceInfo, XServiceName, XServiceDisplayName
 ):
     SERVICE_NAME = "com.sun.star.linguistic2.Proofreader"
-    IMPLEMENTATION_NAME = "org.openoffice.comp.pyuno.LilakPreferred"
-    DISPLAY_NAME = "لیلک؛ رسم‌الخط مرجّح فرهنگستان"
+    IMPLEMENTATION_NAME = "org.openoffice.comp.pyuno.DastoorkhatPreferred"
+    DISPLAY_NAME = "دستورخط؛ رسم‌الخط مرجّح فرهنگستان"
 
     def __init__(self, ctx, *args):
         self.ctx = ctx
@@ -704,8 +704,8 @@ class LilakPreferredSpellchecker(
 
 g_ImplementationHelper = unohelper.ImplementationHelper()
 g_ImplementationHelper.addImplementation(
-    LilakPreferredSpellchecker,
-    LilakPreferredSpellchecker.IMPLEMENTATION_NAME,
-    (LilakPreferredSpellchecker.SERVICE_NAME,),
+    DastoorkhatPreferredSpellchecker,
+    DastoorkhatPreferredSpellchecker.IMPLEMENTATION_NAME,
+    (DastoorkhatPreferredSpellchecker.SERVICE_NAME,),
 )
 
