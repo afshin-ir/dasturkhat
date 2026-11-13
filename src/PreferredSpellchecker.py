@@ -17,7 +17,8 @@ HA_SUFFIXES = (
     "هایشان", "هایمان", "هایتان", "هایم", "هایت", "هایش",
     "هایی", "هاست", "های", "ها",
 )
-MI_PREFIXES = ("نمی", "می")
+MI_PREFIXES = ("نمی", "همی", "می")
+EMPHATIC_HAMI_FOLLOWING = {"نیست"}
 
 
 class LilakPreferredSpellchecker(
@@ -117,7 +118,7 @@ class LilakPreferredSpellchecker(
                     if stem and stem in self.verbs:
                         add(token.start(), token.end(), "lilak-mi-prefix",
                             prefix + ZWNJ + stem,
-                            "پیشوند فعلی «می» با نیم‌فاصله نوشته می‌شود.")
+                            "پیشوند فعلی با نیم‌فاصله نوشته می‌شود.")
                         break
 
             if index + 1 < len(tokens):
@@ -125,12 +126,14 @@ class LilakPreferredSpellchecker(
                 gap = text[token.end():next_token.start()]
                 if gap and gap.isspace() and word in MI_PREFIXES:
                     verb = next_token.group(0)
-                    if verb in self.verbs:
+                    if verb in self.verbs and not (
+                        word == "همی" and verb in EMPHATIC_HAMI_FOLLOWING
+                    ):
                         prefix = word
                         add(token.start(), next_token.end(),
                             "lilak-mi-prefix",
                             prefix + ZWNJ + verb,
-                            "پیشوند فعلی «می» با نیم‌فاصله نوشته می‌شود.")
+                            "پیشوند فعلی با نیم‌فاصله نوشته می‌شود.")
 
                 if gap and gap.isspace() and next_token.group(0) == "ها":
                     if word in self.nominals:
