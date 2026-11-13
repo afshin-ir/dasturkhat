@@ -1,12 +1,12 @@
-# Dastoorkhat — Persian Spell Checking and Preferred Orthography
+# Dasturkhat — Persian Spell Checking and Preferred Orthography
 
 [![صفحهٔ فارسی افزونهٔ دستورخط](assets/readme-fa-button.png)](README.fa.md)
 
-Dastoorkhat provides an optional LibreOffice Writer extension for checking Academy-preferred Persian spellings, alongside its Persian Hunspell dictionary. This project continues Afshin Falatouni’s fork of the upstream Lilak dictionary, which supplies the morphological data and Hunspell spell-checking foundation.
+Dasturkhat provides an optional LibreOffice Writer extension for checking Academy-preferred Persian spellings, alongside its Persian Hunspell dictionary. This project continues Afshin Falatouni’s fork of the upstream Lilak dictionary, which supplies the morphological data and Hunspell spell-checking foundation.
 
 ## Academy-preferred orthography in LibreOffice Writer
 
-Version **3.16** adds a separate, offline proofreader for LibreOffice Writer. It works alongside Hunspell: Hunspell checks whether words are spelled correctly, while the Dastoorkhat proofreader flags selected departures from the preferred spellings in the second edition of the Academy of Persian Language and Literature's *Dastur-e Khat-e Farsi*.
+Version **3.16** adds a separate, offline proofreader for LibreOffice Writer. It works alongside Hunspell: Hunspell checks whether words are spelled correctly, while the Dasturkhat proofreader flags selected departures from the preferred spellings in the second edition of the Academy of Persian Language and Literature's *Dastur-e Khat-e Farsi*.
 
 The Writer extension uses the grammar-checking interface to underline a flagged form and offer a replacement. Its current rules include:
 
@@ -27,7 +27,7 @@ This is a spelling and orthography checker, not a grammar or meaning analyzer. I
 
 ### Enable it in Writer
 
-Install the `.oxt` extension, then open **Tools → Options → Languages and Locales → Writing Aids**. Enable **Check spelling as you type** and **Check grammar as you type**, and set the text language to Persian. Hunspell remains responsible for ordinary spell checking; the Dastoorkhat proofreader supplies these preferred-orthography checks separately.
+Install the `.oxt` extension, then open **Tools → Options → Languages and Locales → Writing Aids**. Enable **Check spelling as you type** and **Check grammar as you type**, and set the text language to Persian. Hunspell remains responsible for ordinary spell checking; the Dasturkhat proofreader supplies these preferred-orthography checks separately.
 
 ### Build the LibreOffice extension
 
@@ -37,7 +37,7 @@ With Python 3 and the repository data available, run:
 make libreoffice
 ```
 
-The package is written to `build/dastoorkhat-fa-IR.oxt`. The repository's GitHub Actions workflow builds this package on pushes to the orthography branch.
+The package is written to `build/dasturkhat-fa-IR.oxt`. The repository's GitHub Actions workflow builds this package on pushes to the orthography branch.
 
 ## Build the Hunspell dictionary
 
@@ -62,8 +62,8 @@ Useful contributions include Persian words with accurate part-of-speech and morp
 
 ## Project history and license
 
-Dastoorkhat is an open-source project inspired by the title of the Academy of Persian Language and Literature’s book *Dastur-e Khat-e Farsi*. It continues the Persian morphology work of the upstream Lilak project and honors Abolhassan Najafi, an associate member of the Academy and author of *Ghalat Nanevisim*.
+Dasturkhat is an open-source project inspired by the title of the Academy of Persian Language and Literature’s book *Dastur-e Khat-e Farsi*. It continues the Persian morphology work of the upstream Lilak project and honors Abolhassan Najafi, an associate member of the Academy and author of *Ghalat Nanevisim*.
 
-Dastoorkhat is distributed under the Apache License 2.0. See [`LICENSE`](LICENSE) for the full license text.
+Dasturkhat is distributed under the Apache License 2.0. See [`LICENSE`](LICENSE) for the full license text.
 
 Special thanks to Dr. Hamid Farrroukh, Dr. Hamid Hassani, Dr. Reza Moshksar, and 5j9 for their work on Persian language resources.
